@@ -1,0 +1,83 @@
+#======================================================================
+# This is a base for all other Makefiles. It standardizes some stuff
+# for us.
+#======================================================================
+
+UNAME := $(shell uname)
+MACAPPEND=
+AUTO_ARGUMENT=
+
+# This flag is specific to the constructor for RollingFileAppender in
+# log4cplus. Under Ubuntu 16.04, there's a 4-argument version but not
+# a 5-argument constructor that's available later.
+# This can be included into CXXFLAGS in Makefiles that might care.
+LOG4CPP_USE_FOUR_ARG_CONSTRUCTOR=
+
+BOOST_THREAD=boost_thread
+CORE_FOUNDATION=
+
+ifeq ($(UNAME), Darwin)
+	MACAPPEND=-mac
+	CXX=clang++
+	OS_VERSION := $(shell system_profiler SPSoftwareDataType | awk '/System Version/ { print $$4; } ')
+	BOOST_THREAD=boost_thread-mt
+	CORE_FOUNDATION=-framework CoreFoundation
+else
+	OS_VERSION := $(shell lsb_release -r  | cut -d: -f2)
+	OS_VERSION := $(strip ${OS_VERSION})
+	ifeq (${OS_VERSION}, 16.04)
+		MACAPPEND=-16.04
+		AUTO_ARGUMENT := -DUSE_AUTO_PTR
+		LOG4CPP_USE_FOUR_ARG_CONSTRUCTOR := -DLOG4CPP_USE_FOUR_ARG_CONSTRUCTOR
+	endif
+endif
+
+SRCDIR := ./src
+OBJDIR := obj${MACAPPEND}
+DEPDIR := .d
+BINDIR := bin${MACAPPEND}
+
+
+# This gives us some starter values. Makefiles should use += to add to these.
+# Be careful with CXX flags and use = instead of := so that INCLUDES gets late expansion.
+INCLUDES := -I/usr/local/include -I${SRCDIR}
+CXXFLAGS = ${INCLUDES} --std=c++17 -g -Wno-unused-local-typedefs -Wno-deprecated-declarations ${AUTO_ARGUMENT}
+LDFLAGS := -L/usr/local/opt/openssl/lib -L/usr/local/lib
+
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
+
+COMPILE.c = $(CC) $(DEPFLAGS) ${INCLUDES} $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+COMPILE.cc = $(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
+
+#======================================================================
+# Build the directories needed.
+# You shouldn't need to invoke these directly.
+#======================================================================
+.PHONY: directories
+directories: ${DEPDIR} ${OBJDIR}
+
+${DEPDIR}:
+	mkdir -p $@
+
+${OBJDIR}:
+	mkdir -p $@
+
+${BINDIR}:
+	mkdir -p $@
+
+#======================================================================
+# How to make the .o files as. This is a little complicated but is
+# derived from:
+# http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+#======================================================================
+
+${OBJDIR}/%.o : %.cpp
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE)
+
+$(DEPDIR)/%.d: ;
+.PRECIOUS: $(DEPDIR)/%.d
+
+INCLUDELIST = $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS_NODIR))))
+include ${INCLUDELIST}

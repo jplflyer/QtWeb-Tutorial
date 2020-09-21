@@ -1,0 +1,17 @@
+CT-StandardLibrary.creator.user*
+core
+cppunit-result/
+.d/
+/Debug/
+docs/
+log/
+obj/
+obj-mac/
+obj-16.04/
+test-bin/
+test-bin-16.04/
+test-bin-mac/
+libvitac.a
+lib/libvitac-mac.a
+lib/libvitac-16.04.a
+redis_client

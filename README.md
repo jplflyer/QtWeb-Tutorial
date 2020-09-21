@@ -6,12 +6,36 @@ There are two Qt projects under this project:
 * Server -- implement a C++ REST interface. This is non-Qt, although I use Qt Creator as my IDE.
 * Client -- implement a demo order entry system. This is a Qt WebAssembly app.
 
-This project is tested to build under Mac.
+This project is tested to build under Mac. You don't necessarily need all these steps in general, but you do to build and run this demo.
 
-1. Install Qt (see below)
-2. Install emscripten
-3. Run and configure Qt
-4. Build
+1. Install some libraries.
+2. Install Qt (see below)
+3. Install emscripten
+4. Run and configure Qt
+5. Build
+
+# Libraries
+The server side requires:
+
+* boost version 1.67 (yes, this is old)
+* PostgreSQL and related libraries libpq and libpqxx
+
+Boost isn't hard but takes a little time:
+
+    cd /tmp
+    wget https://sourceforge.net/projects/boost/files/boost/1.67.0/boost_1_67_0.tar.gz
+    tar xzvf boost_1_67_0.tar.gz
+    cd boost_1_67_0
+    ./bootstrap.sh
+    sudo ./b2 --with=all install
+
+Note that this will overwrite any other boost library you may already have. I have later directions for installing PostgreSQL. You'll want to do that, which will also install libpq.
+
+The C++ library is here:
+
+https://github.com/jtv/libpqxx
+
+I'm sorry, I don't have good installation directions.
 
 # Installing and Configuring Qt
 You can begin here: https://doc.qt.io/qt-5/wasm.html. However, the directions are flawed, and it took me some time to work it out, so I'm going to walk you through the entire process.
