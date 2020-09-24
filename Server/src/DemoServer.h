@@ -19,5 +19,6 @@ public:
     void login(HttpServerResponsePtr response, HttpServerRequestPtr request);
     void getEventTemplates(HttpServerResponsePtr response, HttpServerRequestPtr request);
     void getEvents(HttpServerResponsePtr response, HttpServerRequestPtr request);
+    void saveEvent(HttpServerResponsePtr response, HttpServerRequestPtr request);
 
 };

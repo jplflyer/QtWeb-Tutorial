@@ -12,5 +12,7 @@ public:
 
 signals:
     void setStatus(const QString &);
+    void switchToLoginWindow();
+    void switchToEventsWindow();
 };
 

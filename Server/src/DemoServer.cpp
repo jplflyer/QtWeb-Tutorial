@@ -28,6 +28,7 @@ void DemoServer::setupRoutes() {
     router->get("/login", HTTPFUNCTION_LAMBDA(DemoServer, login));
     router->get("/event_templates", HTTPFUNCTION_LAMBDA(DemoServer, getEventTemplates));
     router->get("/events", HTTPFUNCTION_LAMBDA(DemoServer, getEvents));
+    router->post("/events", HTTPFUNCTION_LAMBDA(DemoServer, saveEvent));
 
     addRouter(router);
 
@@ -110,4 +111,20 @@ DemoServer::getEvents(HttpServerResponsePtr response, HttpServerRequestPtr reque
     Event::Vector vec;
     db.getEvents(vec);
     returnSuccess(response, "OK", &vec, "events");
+}
+
+void
+DemoServer::saveEvent(HttpServerResponsePtr response, HttpServerRequestPtr request) {
+    if (!verifyLogin(response, request)) {
+        return;
+    }
+
+    string body = request->content.string();
+    JSON json = JSON::parse(body);
+    Event::Pointer event = Event::create();
+    event->fromJSON(json);
+
+    db.createEvent(event);
+
+    returnSuccess(response, "OK", event, "event");
 }

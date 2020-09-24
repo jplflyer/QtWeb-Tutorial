@@ -26,6 +26,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void
+MainWindow::setupConnections(BaseForm *form) {
+    QObject::connect(form, SIGNAL(setStatus(const QString &)), this, SLOT(setStatus(const QString &)) );
+    QObject::connect(form, &BaseForm::switchToLoginWindow, this, &MainWindow::switchToLoginWindow);
+    QObject::connect(form, &BaseForm::switchToEventsWindow, this, &MainWindow::switchToEventsWindow);
+}
+
 /**
  * Switch to contain this form. This is a little magic that makes this work
  * as a Single Page App.
@@ -73,12 +80,12 @@ MainWindow::switchToEventsWindow() {
     if (eventsForm == nullptr) {
         eventsForm = new ListEventsForm();
 
-        QObject::connect(eventsForm, SIGNAL(setStatus(const QString &)),
-                         this, SLOT(setStatus(const QString &)) );
+        setupConnections(eventsForm);
         QObject::connect(eventsForm, &ListEventsForm::createNewEvent,
                          this, &MainWindow::createNewEvent);
     }
     switchForm(eventsForm);
+    eventsForm->beginLoad();
 }
 
 /**
@@ -96,6 +103,7 @@ void
 MainWindow::createNewEvent() {
     if (newEventForm == nullptr) {
         newEventForm = new NewEventForm();
+        setupConnections(newEventForm);
     }
     newEventForm->reset();
     switchForm(newEventForm);

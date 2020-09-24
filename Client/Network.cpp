@@ -116,3 +116,34 @@ Network::gotAllEvents() {
         emit gotEvents(vec);
     }
 }
+
+void
+Network::saveNewEvent(Event::Pointer event) {
+    QNetworkRequest req(QString("/demo/events"));
+    req.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
+    setAuthorization(req, "demo", "demo");
+
+    // Get the JSON
+    QJsonObject json;
+    event->toJSON(json);
+    QJsonDocument doc(json);
+    QByteArray body = doc.toJson();
+
+    QNetworkReply * reply = manager.post(req, body);
+    connect(reply, &QNetworkReply::finished, this, &Network::gotSaveEvent);
+}
+
+void
+Network::gotSaveEvent() {
+    QNetworkReply * reply = static_cast<QNetworkReply *>(QObject::sender());
+    if (reply->error()) {
+    }
+    else {
+        QByteArray body = reply->readAll();
+        QJsonDocument doc(QJsonDocument::fromJson(body));
+        QJsonObject obj = doc.object();
+        QJsonValue tValue = obj["event"];
+
+        emit saveEventComplete();
+    }
+}

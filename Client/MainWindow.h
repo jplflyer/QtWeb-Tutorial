@@ -34,6 +34,7 @@ private:
     ListEventsForm *eventsForm = nullptr;
     NewEventForm *newEventForm = nullptr;
 
+    void setupConnections(BaseForm *);
     void switchForm(QWidget *widget);
 
 };

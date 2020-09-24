@@ -21,8 +21,9 @@ public:
     explicit ListEventsForm(QWidget *parent = nullptr);
     ~ListEventsForm();
 
+    void beginLoad();
+
 public slots:
-    void pingCompleted(QNetworkReply *);
     void gotEventTemplates(EventTemplate::Vector &);
     void gotEvents(Event::Vector &);
     void on_createNewPB_clicked();

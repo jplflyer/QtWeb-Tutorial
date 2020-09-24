@@ -11,6 +11,11 @@ private:
     int			eventTemplateId;
 
 public:
+    typedef QSharedPointer<Event> Pointer;
+    typedef QVector<QSharedPointer<Event>> Vector;
+
+    static Pointer create() { return QSharedPointer<Event>::create(); }
+
     Event() = default;
     Event(const QString & _name, int _eventTemplateId = 0): name(_name), eventTemplateId(_eventTemplateId) {}
 
@@ -24,7 +29,5 @@ public:
     Event & setName(const QString &value) { name = value; return *this; }
     Event & setEventTemplateId(int value) { eventTemplateId = value; return *this; }
 
-    typedef QSharedPointer<Event> Pointer;
-    typedef QVector<QSharedPointer<Event>> Vector;
 
 };

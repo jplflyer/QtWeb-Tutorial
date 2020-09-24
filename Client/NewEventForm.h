@@ -2,13 +2,14 @@
 
 #include <QWidget>
 
+#include "BaseForm.h"
 #include "Network.h"
 
 namespace Ui {
 class NewEventForm;
 }
 
-class NewEventForm : public QWidget
+class NewEventForm : public BaseForm
 {
     Q_OBJECT
 
@@ -20,9 +21,11 @@ public:
 
 public slots:
     void gotEventTemplates(EventTemplate::Vector &);
+    void saveEventComplete();
 
+private slots:
     void on_cancelBtn_clicked();
-    void on_saveTbn_clicked();
+    void on_saveBtn_clicked();
 
 private:
     Ui::NewEventForm *ui;

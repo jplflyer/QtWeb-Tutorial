@@ -11,11 +11,8 @@ ListEventsForm::ListEventsForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(&network, SIGNAL(pingCompleted(QNetworkReply *)), this, SLOT(pingCompleted(QNetworkReply *)) );
     connect(&network, SIGNAL(gotEventTemplates(EventTemplate::Vector &)), this, SLOT(gotEventTemplates(EventTemplate::Vector &)) );
     connect(&network, SIGNAL(gotEvents(Event::Vector &)), this, SLOT(gotEvents(Event::Vector &)) );
-
-    network.ping();
 }
 
 ListEventsForm::~ListEventsForm()
@@ -35,15 +32,7 @@ ListEventsForm::~ListEventsForm()
  * The ping completed.
  */
 void
-ListEventsForm::pingCompleted(QNetworkReply *reply) {
-    QByteArray read = reply->readAll();
-    QString msg{"Reply Completed: "};
-    QString body(read);
-
-    msg.append(body);
-
-    emit setStatus(msg);
-
+ListEventsForm::beginLoad() {
     network.getAllEventTemplates();
 }
 

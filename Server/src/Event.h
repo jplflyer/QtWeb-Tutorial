@@ -10,6 +10,9 @@ private:
     int				eventTemplateId;
 
 public:
+    typedef std::shared_ptr<Event> Pointer;
+    typedef JSON_Serializable_Vector<Event> Vector;
+
     Event() = default;
     Event(const std::string & _name, int _eventTemplateId = 0): name(_name), eventTemplateId(_eventTemplateId) {}
 
@@ -23,7 +26,5 @@ public:
     Event & setName(const std::string &value) { name = value; return *this; }
     Event & setEventTemplateId(int value) { eventTemplateId = value; return *this; }
 
-    typedef std::shared_ptr<Event> Pointer;
-    typedef JSON_Serializable_Vector<Event> Vector;
-
+    static Pointer create() { return std::make_shared<Event>(); }
 };

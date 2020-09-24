@@ -310,8 +310,15 @@ void Database::createEvent(Event::Pointer et) {
         pqxx::result results{ transaction.exec_prepared("event_seq") };
         for (pqxx::row row: results) {
             et->setId( row[0].as<int>() );
+            break;
         }
-        transaction.exec_prepared("event_create", et->getId(), et->getName(), et->getEventTemplateId());
+
+        if (et->getEventTemplateId() == 0) {
+            transaction.exec_prepared("event_create", et->getId(), et->getName(), nullptr);
+        }
+        else {
+            transaction.exec_prepared("event_create", et->getId(), et->getName(), et->getEventTemplateId());
+        }
     }
     transaction.commit();
 }
