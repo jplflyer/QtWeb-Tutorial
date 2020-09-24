@@ -23,13 +23,11 @@ The app in question is a WebAssembly app that runs on the browser and a C++ serv
 This will take a bit of time. You then need to do a minor bit of configuration. On Mac, nginx runs out of /usr/local/etc/nginx, and there is an nginx.conf file in that directory. We need to define a proxy_pass section. This is what I did.
 
     mkdir /usr/local/etc/nginx/services
-    cp files/DemoClient.conf /usr/local/etc/nginx/services
+    cp files/DemoClient.conf /usr/local/etc/nginx/servers
 
-Then edit /usr/local/etc/nginx/nginx.conf. There's an http section. Inside the http section is a server section. Add this line to the bottom of the server section:
+You'll want to edit DemoClient.conf and change the server host name and path it lists. This lets nginx find your compiled webassembly files without copying them somewhere. Note that this ALSO lets nginx serve up the source code, but this is only a demo. Note that the build directory that's listed in the path is created by Qt Creator. It will be at the top of this directory path. In my world, I put all my project directories under my Work directory, but you might have this somewhere else. Just adjust accordingly.
 
-    include services/*;
-
-Now, that's how I did it, but you could just as easily include the text of DemoClient.conf into that location instead.
+Edit your /etc/hosts so that whatever host name you set in the DemoClient.conf resolves to your local machine. My desktop is called "green", which is the server name that appears in the file.
 
     brew services restart nginx
 
@@ -164,7 +162,17 @@ You now need to configure the kit itself. Switch from the Compilers tab to the K
 
 What's important is that you have to make sure that the compiler settings in the middle of that say the Emscripten compiler. If so, the kit is all set. Save the changes.
 
-# Working Within Qt
+Unfortunately, because it points to clang instead of Emscripten, I run into other issues, so I finally figured out how to fix the autodiscover of Emscripten.
+
+* quit Qt Creator
+* edit ~/.config/QtProject/qtcreator/toolchains.xml
+* Search for Emscripten. You'll find references in two different tools.
+* In each of the sections, change: a line to give a different path.
+<br />
+
+   \<value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/local/emsdk/upstream/emscripten/em++\>\</value\>
+
+Save the file and then Qt Creator should behave better for you.
 
 # Build from Command Line
 You'll need to make sure you have GNU make and g++.
@@ -184,11 +192,17 @@ You'll need to make sure you have GNU make and g++.
     Thread model: posix
     InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
 
-You can run make from either of the project directories or at the top level.
+In the Server directory, run make. From Qt Creator, open the project and click the Build tool in the lower left.
 
 # Install and Run
-From the top, you can run make install. This copies the WebAssembly files into place for nginx.
+I've been running DemoServer manually. Run it once like this:
 
-You also can CD into the Server app and run DemoServer on the default port.
+    ./DemoServer --create
 
-At this point, browse to http://localhost:8080/OrderEntry.html
+This creates some sample data. If you don't do this, the demo is going to be very boring. Then run it like this:
+
+    ./DemoServer
+
+It doesn't background itself, and it's chatty.
+
+At this point, browse to http://localhost:8080/Client.html. You'll probably need to change the host name to match whatever you configured when setting up nginx.
