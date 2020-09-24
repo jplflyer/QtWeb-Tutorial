@@ -40,4 +40,10 @@ echo
 psql -U webdemo webdemo << EOF
 CREATE TABLE IF NOT EXISTS member (id int primary key, username varchar(1024), crypted_password varchar(1024), name_first varchar(1024), name_list varchar(1024));
 CREATE SEQUENCE IF NOT EXISTS member_seq START WITH 1;
+
+CREATE TABLE IF NOT EXISTS event_template (id int primary key, name varchar(1024));
+CREATE SEQUENCE IF NOT EXISTS event_template_seq START WITH 1;
+
+CREATE TABLE IF NOT EXISTS event (id int primary key, name varchar(1024), event_template_id int references event_template(id) );
+CREATE SEQUENCE IF NOT EXISTS event_seq START WITH 1;
 EOF

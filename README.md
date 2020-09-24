@@ -8,11 +8,52 @@ There are two Qt projects under this project:
 
 This project is tested to build under Mac. You don't necessarily need all these steps in general, but you do to build and run this demo.
 
-1. Install some libraries.
-2. Install Qt (see below)
-3. Install emscripten
-4. Run and configure Qt
-5. Build
+1. Install and configure nginx and postgresql.
+2. Install some libraries.
+3. Install Qt (see below)
+4. Install emscripten
+5. Run and configure Qt
+6. Build
+
+# nginx
+The app in question is a WebAssembly app that runs on the browser and a C++ server app that runs wherever you run it. However, WebAssembly apps can only talk to the server from where they're loaded. For this reason, you'll need nginx.
+
+    brew install nginx
+
+This will take a bit of time. You then need to do a minor bit of configuration. On Mac, nginx runs out of /usr/local/etc/nginx, and there is an nginx.conf file in that directory. We need to define a proxy_pass section. This is what I did.
+
+    mkdir /usr/local/etc/nginx/services
+    cp files/DemoClient.conf /usr/local/etc/nginx/services
+
+Then edit /usr/local/etc/nginx/nginx.conf. There's an http section. Inside the http section is a server section. Add this line to the bottom of the server section:
+
+    include services/*;
+
+Now, that's how I did it, but you could just as easily include the text of DemoClient.conf into that location instead.
+
+    brew services restart nginx
+
+# PostgreSQL
+    brew install postgresql
+
+I already have postgresql running locally, but I think you probably need to do this:
+
+    brew services start postgresql
+
+If you want, you can configure security however you typically manage PostgreSQL. Then:
+
+    createuser --createdb --pwprompt webdemo
+
+Give it the ultra-secure password of webdemo-asdf. Then run this script:
+
+   ./CreateDB.sh
+
+Yes, that ultra-secure password is in this script. It's just a demo. You can test it with:
+
+    psql webdemo webdemo
+    select * from users;
+
+It will be empty (for now).
 
 # Libraries
 The server side requires:
@@ -29,13 +70,11 @@ Boost isn't hard but takes a little time:
     ./bootstrap.sh
     sudo ./b2 --with=all install
 
-Note that this will overwrite any other boost library you may already have. I have later directions for installing PostgreSQL. You'll want to do that, which will also install libpq.
-
-The C++ library is here:
+Note that this will overwrite any other boost library you may already have. Libpq comes with PostgreSQL, which you've already installed. The C++ library is here:
 
 https://github.com/jtv/libpqxx
 
-I'm sorry, I don't have good installation directions.
+I'm sorry, I don't have good installation directions, but it shouldn't be hard.
 
 # Installing and Configuring Qt
 You can begin here: https://doc.qt.io/qt-5/wasm.html. However, the directions are flawed, and it took me some time to work it out, so I'm going to walk you through the entire process.
@@ -146,34 +185,6 @@ You'll need to make sure you have GNU make and g++.
     InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
 
 You can run make from either of the project directories or at the top level.
-
-# nginx
-The app in question is a WebAssembly app that runs on the browser and a C++ server app that runs wherever you run it. However, WebAssembly apps can only talk to the server from where they're loaded. For this reason, you'll need nginx.
-
-    brew install nginx
-
-This will take a bit of time.
-
-# PostgreSQL
-    brew install postgresql
-
-I already have postgresql running locally, but I thin you probably need to do this:
-
-    brew services start postgresql
-
-If you want, you can configure security however you typically manage PostgreSQL. Then:
-
-    createuser --createdb --pwprompt webdemo
-
-Give it the ultra-secure password of webdemo-asdf. Then create the db. From the top of this directory:
-
-   ./CreateDB.sh
-
-Yes, that ultra-secure password is in this script. It's just a demo. You can test it with:
-
-    psql webdemo webdemo
-    select * from users;
-
 
 # Install and Run
 From the top, you can run make install. This copies the WebAssembly files into place for nginx.

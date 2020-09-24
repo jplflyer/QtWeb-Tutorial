@@ -26,6 +26,8 @@ void DemoServer::setupRoutes() {
 
     router->get("/ping", HTTPFUNCTION_LAMBDA(DemoServer, ping));
     router->get("/login", HTTPFUNCTION_LAMBDA(DemoServer, login));
+    router->get("/event_templates", HTTPFUNCTION_LAMBDA(DemoServer, getEventTemplates));
+    router->get("/events", HTTPFUNCTION_LAMBDA(DemoServer, getEvents));
 
     addRouter(router);
 
@@ -33,37 +35,79 @@ void DemoServer::setupRoutes() {
     RESTServer::setupRoutes();
 }
 
-/**
- *
- */
-void DemoServer::ping(HttpServerResponsePtr response, HttpServerRequestPtr ) {
-    returnSuccess(response, "OK");
-}
-
-
-void DemoServer::login(HttpServerResponsePtr response, HttpServerRequestPtr request) {
+bool
+DemoServer::verifyLogin(HttpServerResponsePtr response, HttpServerRequestPtr request) {
     string username;
     string pw;
 
     if (!parseAuthorizationHeader(request, username, pw)) {
         cout << "No proper Authorization header." << endl;
         returnError(response, "Invalid login");
-        return;
+        return false;
     }
 
     User::Pointer user = db.getUser(username);
     if (user == nullptr) {
         cout << "Invalid user." << endl;
         returnError(response, "Invalid login");
-        return;
+        return false;
     }
 
     string crypted = Database::simpleSHA256(pw);
     if (crypted != user->getCryptedPassword()) {
         cout << "Invalid password." << endl;
         returnError(response, "Invalid login");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ *
+ */
+void
+DemoServer::ping(HttpServerResponsePtr response, HttpServerRequestPtr ) {
+    returnSuccess(response, "OK");
+}
+
+/**
+ * Login verification. This actually isn't necessary for use of the other calls,
+ * but it provides a login method that can be used to validate credentials.
+ */
+void
+DemoServer::login(HttpServerResponsePtr response, HttpServerRequestPtr request) {
+    if (!verifyLogin(response, request)) {
         return;
     }
 
     returnSuccess(response, "OK");
+}
+
+/**
+ * Retrieve all Event Templates.
+ */
+void
+DemoServer::getEventTemplates(HttpServerResponsePtr response, HttpServerRequestPtr request) {
+    if (!verifyLogin(response, request)) {
+        return;
+    }
+
+    EventTemplate::Vector vec;
+    db.getEventTemplates(vec);
+    returnSuccess(response, "OK", &vec, "eventTemplates");
+}
+
+/**
+ * Retrieve all Events.
+ */
+void
+DemoServer::getEvents(HttpServerResponsePtr response, HttpServerRequestPtr request) {
+    if (!verifyLogin(response, request)) {
+        return;
+    }
+
+    Event::Vector vec;
+    db.getEvents(vec);
+    returnSuccess(response, "OK", &vec, "events");
 }

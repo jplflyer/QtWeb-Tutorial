@@ -12,6 +12,8 @@ SOURCES += \
     src/Database.cpp \
     src/DbBaseObject.cpp \
     src/DemoServer.cpp \
+    src/Event.cpp \
+    src/EventTemplate.cpp \
     src/JSON_Serializable.cpp \
     src/OptionHandler.cpp \
     src/RESTServer.cpp \
@@ -24,6 +26,8 @@ HEADERS += \
     src/Database.h \
     src/DbBaseObject.h \
     src/DemoServer.h \
+    src/Event.h \
+    src/EventTemplate.h \
     src/JSON_Serializable.h \
     src/OptionHandler.h \
     src/PointerVector.h \

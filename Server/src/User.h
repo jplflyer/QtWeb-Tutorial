@@ -16,8 +16,8 @@ private:
 public:
     User();
 
-    void fromJSON(const nlohmann::json & json);
-    void toJSON(nlohmann::json & json) const;
+    void fromJSON(const JSON & json);
+    void toJSON(JSON & json) const;
 
     const std::string &	getUsername() const { return username; }
     const std::string &	getCryptedPassword() const { return cryptedPassword; }
@@ -31,5 +31,6 @@ public:
     User & setNameLast(const std::string &value) { nameLast = value; return *this; }
 
     typedef std::shared_ptr<User> Pointer;
-    typedef std::vector<Pointer> Vector;
+    typedef JSON_Serializable_Vector<User> Vector;
+
 };

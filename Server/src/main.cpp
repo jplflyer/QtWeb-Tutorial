@@ -49,11 +49,14 @@ void seedDb() {
     db.connect(url);
     cout.flush();
 
+    //----------------------------------------------------------------------
+    // Create a demo user.
+    //----------------------------------------------------------------------
     User::Vector allUsers;
 
     cout << "Load users." << endl;
-    db.getUsers(allUsers);
     cout.flush();
+    db.getUsers(allUsers);
 
     if (allUsers.size() == 0) {
         cout << "Must create users." << endl;
@@ -72,5 +75,60 @@ void seedDb() {
                 .setNameLast("Demo");
 
         db.createUser(user);
+    }
+
+    //----------------------------------------------------------------------
+    // Create event templates.
+    //----------------------------------------------------------------------
+    EventTemplate::Vector allTemplates;
+    EventTemplate::Pointer etICSCloudOnly = nullptr;
+    EventTemplate::Pointer etICS = nullptr;
+    EventTemplate::Pointer etZoom = nullptr;
+
+    cout << "Load Event Templates." << endl;
+    cout.flush();
+    db.getEventTemplates(allTemplates);
+
+    if (allTemplates.size() == 0) {
+        cout << "Must create templates." << endl;
+        cout.flush();
+
+        etICSCloudOnly = std::make_shared<EventTemplate>("ICS Cloud Only");
+        db.createEventTemplate(etICSCloudOnly);
+
+        etICS = std::make_shared<EventTemplate>("ICS Cloud and Classic");
+        db.createEventTemplate(etICS);
+
+        etZoom = std::make_shared<EventTemplate>("Zoom Meeting");
+        db.createEventTemplate(etZoom);
+    }
+    else {
+        for (EventTemplate::Pointer &ptr: allTemplates) {
+            string name = ptr->getName();
+            if (name == "ICS Cloud Only") {
+                etICSCloudOnly = ptr;
+            }
+            else if (name == "ICS Cloud and Classic") {
+                etICS = ptr;
+            }
+            else if (name == "Zoom Meeting") {
+                etZoom = ptr;
+            }
+        }
+    }
+
+    //----------------------------------------------------------------------
+    // Create some sample events.
+    //----------------------------------------------------------------------
+    Event::Vector existingEvents;
+
+    if (existingEvents.size() == 0) {
+        Event::Pointer icsCloudMeeting = std::make_shared<Event>("Cloudy Ideas", etICSCloudOnly->getId());
+        Event::Pointer icsZoomMeeting = std::make_shared<Event>("Zoom Ahead", etZoom->getId());
+        Event::Pointer icsTeslaMeeting = std::make_shared<Event>("Tesla Beats Mazda!", etZoom->getId());
+
+        db.createEvent(icsCloudMeeting);
+        db.createEvent(icsZoomMeeting);
+        db.createEvent(icsTeslaMeeting);
     }
 }

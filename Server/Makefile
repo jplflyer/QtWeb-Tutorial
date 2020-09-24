@@ -66,3 +66,5 @@ echo:
 
 DemoServer: ${OBJ_LIST}
 	g++ ${OBJ_LIST} ${LDFLAGS} -o DemoServer
+
+${OBJDIR}/Database.o: src/Database.cpp src/Database.h src/User.h src/Event.h src/EventTemplate.h
